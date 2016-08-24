@@ -1,23 +1,37 @@
 package org.management.domain;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Data
+@NoArgsConstructor
+@Entity
+@Table(name = "employee")
 public class Employee {
 
-    private String firstName;
-    private String lastName;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull
     private String employeeId;
-    private String teamId;
+    @NotNull
+    private String firstName;
+    @NotNull
+    private String lastName;
+    @NotNull
+    private Team team;
+    @NotNull
     private String role;
-    private String managerId;
+    private Employee manager;
 
-    public Employee(String firstName, String lastName, String employeeId, String teamId, String role, String managerId) {
+    public Employee(String firstName, String lastName, String employeeId, Team team, String role, Employee manager) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.employeeId = employeeId;
-        this.teamId = teamId;
+        this.team = team;
         this.role = role;
-        this.managerId = managerId;
+        this.manager = manager;
     }
 }
