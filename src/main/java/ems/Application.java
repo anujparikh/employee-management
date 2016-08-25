@@ -1,4 +1,4 @@
-package org.management.application;
+package ems;
 
 
 import org.springframework.boot.SpringApplication;

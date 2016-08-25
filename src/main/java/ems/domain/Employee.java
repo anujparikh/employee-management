@@ -1,9 +1,7 @@
-package org.management.domain;
+package ems.domain;
 
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -14,8 +12,7 @@ import javax.validation.constraints.NotNull;
 public class Employee {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
     @NotNull
@@ -33,6 +30,8 @@ public class Employee {
     @NotNull
     private String role;
     private String managerId;
+
+    public Employee() { }
 
     public Employee(String firstName, String lastName, String email, String teamId, String role, String managerId) {
         this.firstName = firstName;
