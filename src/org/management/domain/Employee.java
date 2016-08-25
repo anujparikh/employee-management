@@ -1,13 +1,14 @@
 package org.management.domain;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Data
-@NoArgsConstructor
 @Entity
 @Table(name = "employee")
 public class Employee {
@@ -15,23 +16,30 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
-    private String employeeId;
+    private long id;
+
     @NotNull
     private String firstName;
+
     @NotNull
     private String lastName;
+
     @NotNull
-    private Team team;
+    private String email;
+
+    @NotNull
+    private String teamId;
+
     @NotNull
     private String role;
-    private Employee manager;
+    private String managerId;
 
-    public Employee(String firstName, String lastName, String employeeId, Team team, String role, Employee manager) {
+    public Employee(String firstName, String lastName, String email, String teamId, String role, String managerId) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.employeeId = employeeId;
-        this.team = team;
+        this.email = email;
+        this.teamId = teamId;
         this.role = role;
-        this.manager = manager;
+        this.managerId = managerId;
     }
 }

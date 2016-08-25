@@ -1,3 +1,4 @@
 *.class
-*.impl
 .idea/
+target/
+/employee-management.iml

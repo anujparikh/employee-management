@@ -4,7 +4,7 @@ import org.management.domain.Leave;
 
 import java.util.List;
 
-public interface LeaveService extends GenericDao{
+public interface LeaveService extends EmployeeDao {
 
     List<Leave> retrieveLeavesOnEmployeeId(String employeeId);
 
