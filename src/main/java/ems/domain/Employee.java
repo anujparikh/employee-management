@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @Entity
 @Table(name = "employee")
+@NoArgsConstructor
 public class Employee {
 
     @Id
@@ -31,8 +32,6 @@ public class Employee {
     private String role;
     private String managerId;
 
-    public Employee() { }
-
     public Employee(String firstName, String lastName, String email, String teamId, String role, String managerId) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -40,5 +39,9 @@ public class Employee {
         this.teamId = teamId;
         this.role = role;
         this.managerId = managerId;
+    }
+
+    public Employee(long id) {
+        this.id = id;
     }
 }
