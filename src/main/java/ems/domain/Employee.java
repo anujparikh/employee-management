@@ -30,6 +30,7 @@ public class Employee {
 
     @NotNull
     private String role;
+
     private String managerId;
 
     public Employee(String firstName, String lastName, String email, String teamId, String role, String managerId) {

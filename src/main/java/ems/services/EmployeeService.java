@@ -9,9 +9,11 @@ import java.util.List;
 
 @Repository
 @Transactional
-public interface EmployeeDao extends CrudRepository<Employee, Long> {
+public interface EmployeeService extends CrudRepository<Employee, Long> {
 
     public List<Employee> findByRole (String role);
 
     public List<Employee> findByTeamId (String teamId);
+
+    public List<Employee> findByManagerId (String managerId);
 }
