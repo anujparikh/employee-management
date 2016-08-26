@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/employeecontroller")
@@ -92,7 +92,7 @@ public class EmployeeController implements ErrorController {
     @RequestMapping("/{teamId}/team-list")
     @ResponseBody
     public String findByTeamId(@PathVariable String teamId) {
-        List<Employee> retrievedEmployeeList;
+        Set<Employee> retrievedEmployeeList;
         try {
             retrievedEmployeeList = employeeDAO.findByTeamId(teamId);
         } catch (Exception e) {
@@ -104,7 +104,7 @@ public class EmployeeController implements ErrorController {
     @RequestMapping("/{role}/role-list")
     @ResponseBody
     public String findByRole(@PathVariable String role) {
-        List<Employee> retrievedEmployeeList;
+        Set<Employee> retrievedEmployeeList;
         try {
             retrievedEmployeeList = employeeDAO.findByRole(role);
         } catch (Exception e) {
@@ -116,7 +116,7 @@ public class EmployeeController implements ErrorController {
     @RequestMapping("/{managerId}/employees")
     @ResponseBody
     public String findByManagerId(@PathVariable Long managerId) {
-        List<Employee> retrievedEmployeeList;
+        Set<Employee> retrievedEmployeeList;
         try {
             retrievedEmployeeList = employeeDAO.findByManagerId(managerId);
         } catch (Exception e) {

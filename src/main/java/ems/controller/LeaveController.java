@@ -1,5 +1,6 @@
 package ems.controller;
 
+import ems.domain.Employee;
 import ems.domain.Leave;
 import ems.dao.EmployeeDAO;
 import ems.dao.LeaveDAO;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/leavecontroller")
@@ -40,7 +42,8 @@ public class LeaveController {
         Leave leave;
         try {
             LocalDate inputStartDate = startDate == null ? LocalDate.now() : LocalDate.parse(startDate, formatter);
-            leave = new Leave(inputStartDate, noOfDays, employeeDAO.findOne(employeeId), "N");
+            Employee retrievedEmployee = employeeDAO.findOne(employeeId);
+            leave = new Leave(inputStartDate, noOfDays, retrievedEmployee, "N", employeeDAO.findByTeamId(retrievedEmployee.getTeamId()));
             leaveDAO.save(leave);
             leaveId = String.valueOf(leave.getId());
         } catch (Exception e) {
@@ -99,7 +102,7 @@ public class LeaveController {
     @RequestMapping("/{teamId}/team-list")
     @ResponseBody
     public String findByTeamId(@PathVariable String teamId) {
-        List<Leave> retrievedLeaveList;
+        Set<Leave> retrievedLeaveList;
         try {
             retrievedLeaveList = leaveDAO.findByTeamId(teamId);
         } catch (Exception e) {

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.Set;
 
 @Data
 @Entity
@@ -34,18 +34,21 @@ public class Leave {
 
     private String approvalStatus;
     private String autoDeducted;
-
     private String teamId;
+
+    @ManyToMany(mappedBy = "leaves")
+    private Set<Employee> approverEmployeeIdList;
+
 
     public Leave(long id) {
         this.id = id;
     }
 
-    public Leave(LocalDate startDate, Integer noOfDays, Employee employee) {
-        this(startDate, noOfDays, employee, "Y");
+    public Leave(LocalDate startDate, Integer noOfDays, Employee employee, Set<Employee> approverEmployeeIdList) {
+        this(startDate, noOfDays, employee, "Y", approverEmployeeIdList);
     }
 
-    public Leave(LocalDate startDate, Integer noOfDays, Employee employee, String autoDeducted) {
+    public Leave(LocalDate startDate, Integer noOfDays, Employee employee, String autoDeducted, Set<Employee> approverEmployeeIdList) {
         this.noOfDays = noOfDays;
         this.startDate = startDate;
         this.endDate = startDate.plusDays(noOfDays);
@@ -53,5 +56,6 @@ public class Leave {
         this.autoDeducted = autoDeducted;
         this.approvalStatus = "P";
         this.teamId = employee.getTeamId();
+        this.approverEmployeeIdList = approverEmployeeIdList;
     }
 }
