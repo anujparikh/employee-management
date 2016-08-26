@@ -41,9 +41,9 @@ public class EmployeeController implements ErrorController {
         return "User successfully created with id = " + employeeId;
     }
 
-    @RequestMapping("/update")
+    @RequestMapping("/update/{id}")
     @ResponseBody
-    public String update(@RequestParam("id") long id,
+    public String update(@PathVariable("id") long id,
                          @RequestParam(value = "firstName", required = false) String firstName,
                          @RequestParam(value = "lastName", required = false) String lastName,
                          @RequestParam(value = "email", required = false) String email,
