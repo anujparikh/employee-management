@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/leavecontroller")
@@ -95,5 +94,17 @@ public class LeaveController {
             return "Error deleting the leave: " + e.toString();
         }
         return "leave successfully with size = " + finalListOfLeaves.size();
+    }
+
+    @RequestMapping("/{teamId}/team-list")
+    @ResponseBody
+    public String findByTeamId(@PathVariable String teamId) {
+        List<Leave> retrievedLeaveList;
+        try {
+            retrievedLeaveList = leaveDAO.findByTeamId(teamId);
+        } catch (Exception e) {
+            return "Error fetching the employee";
+        }
+        return "Total Retrieved Leaves for team with id " + teamId + " is " + retrievedLeaveList.size();
     }
 }
