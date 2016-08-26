@@ -1,7 +1,7 @@
 package ems.controller;
 
-import ems.domain.Employee;
 import ems.dao.EmployeeDAO;
+import ems.domain.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.stereotype.Controller;
@@ -28,11 +28,12 @@ public class EmployeeController implements ErrorController {
                          String email,
                          String teamId,
                          String role,
-                         @RequestParam(value = "managerId", required = false) String managerId) {
+                         @RequestParam(value = "managerId", required = false) Long managerId) {
         String employeeId = "";
         Employee employee;
         try {
-            employee = new Employee(firstName, lastName, email, teamId, role, managerId);
+            Employee manager = managerId != null ? employeeDAO.findOne(managerId) : null;
+            employee = new Employee(firstName, lastName, email, teamId, role, manager);
             employeeDAO.save(employee);
             employeeId = String.valueOf(employee.getId());
         } catch (Exception e) {
@@ -43,13 +44,13 @@ public class EmployeeController implements ErrorController {
 
     @RequestMapping("/update/{id}")
     @ResponseBody
-    public String update(@PathVariable("id") long id,
+    public String update(@PathVariable("id") Long id,
                          @RequestParam(value = "firstName", required = false) String firstName,
                          @RequestParam(value = "lastName", required = false) String lastName,
                          @RequestParam(value = "email", required = false) String email,
                          @RequestParam(value = "teamId", required = false) String teamId,
                          @RequestParam(value = "role", required = false) String role,
-                         @RequestParam(value = "managerId", required = false) String managerId) {
+                         @RequestParam(value = "managerId", required = false) Long managerId) {
         try {
             Employee employeeToBeUpdated = employeeDAO.findOne(id);
             if (firstName != null) employeeToBeUpdated.setFirstName(firstName);
@@ -57,7 +58,7 @@ public class EmployeeController implements ErrorController {
             if (email != null) employeeToBeUpdated.setEmail(email);
             if (teamId != null) employeeToBeUpdated.setTeamId(teamId);
             if (role != null) employeeToBeUpdated.setRole(role);
-            if (managerId != null) employeeToBeUpdated.setManagerId(managerId);
+            if (managerId != null) employeeToBeUpdated.setManager(employeeDAO.findOne(managerId));
             employeeDAO.save(employeeToBeUpdated);
         } catch (Exception e) {
             return "Error updating the user: " + e.toString();
@@ -67,7 +68,7 @@ public class EmployeeController implements ErrorController {
 
     @RequestMapping("/delete/{id}")
     @ResponseBody
-    public String delete(@PathVariable("id") long id) {
+    public String delete(@PathVariable("id") Long id) {
         try {
             employeeDAO.delete(new Employee(id));
         } catch (Exception e) {
@@ -78,7 +79,7 @@ public class EmployeeController implements ErrorController {
 
     @RequestMapping("/{id}")
     @ResponseBody
-    public String findOneById(@PathVariable("id") long id) {
+    public String findOneById(@PathVariable("id") Long id) {
         Employee retrievedEmployee;
         try {
             retrievedEmployee = employeeDAO.findOne(id);
@@ -114,7 +115,7 @@ public class EmployeeController implements ErrorController {
 
     @RequestMapping("/{managerId}/employees")
     @ResponseBody
-    public String findByManagerId(@PathVariable long managerId) {
+    public String findByManagerId(@PathVariable Long managerId) {
         List<Employee> retrievedEmployeeList;
         try {
             retrievedEmployeeList = employeeDAO.findByManagerId(managerId);

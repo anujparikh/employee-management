@@ -31,18 +31,20 @@ public class Employee {
     @NotNull
     private String role;
 
-    private String managerId;
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    private Employee manager;
 
-    public Employee(String firstName, String lastName, String email, String teamId, String role, String managerId) {
+    public Employee(String firstName, String lastName, String email, String teamId, String role, Employee manager) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.teamId = teamId;
         this.role = role;
-        this.managerId = managerId;
+        this.manager = manager;
     }
 
-    public Employee(long id) {
+    public Employee(Long id) {
         this.id = id;
     }
 }

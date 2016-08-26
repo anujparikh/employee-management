@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface LeaveDAO extends PagingAndSortingRepository<Leave, Long> {
 
-    public List<Leave> findByTeamId(String teamId);
+    List<Leave> findByTeamId(String teamId);
 
-    public List<Leave> findByStartDateBetween(LocalDate startDate, LocalDate endDate);
+    List<Leave> findByStartDateBetween(LocalDate startDate, LocalDate endDate);
 }

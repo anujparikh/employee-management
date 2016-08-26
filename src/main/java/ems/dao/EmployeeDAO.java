@@ -11,9 +11,9 @@ import java.util.List;
 @Repository
 public interface EmployeeDAO extends PagingAndSortingRepository<Employee, Long> {
 
-    public List<Employee> findByRole (String role);
+    List<Employee> findByRole (String role);
 
-    public List<Employee> findByTeamId (String teamId);
+    List<Employee> findByTeamId (String teamId);
 
-    public List<Employee> findByManagerId (long managerId);
+    List<Employee> findByManagerId (long managerId);
 }
