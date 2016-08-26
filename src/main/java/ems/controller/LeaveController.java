@@ -1,8 +1,9 @@
-package ems.controllers;
+package ems.controller;
 
 import ems.domain.Leave;
-import ems.services.EmployeeService;
-import ems.services.LeaveService;
+import ems.dao.EmployeeDAO;
+import ems.dao.LeaveDAO;
+import ems.service.LeaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +24,13 @@ public class LeaveController {
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
     @Autowired
-    private LeaveService leaveService;
+    private LeaveDAO leaveDAO;
 
     @Autowired
-    private EmployeeService employeeService;
+    private EmployeeDAO employeeDAO;
+
+    @Autowired
+    private LeaveService leaveService;
 
     @RequestMapping("/create")
     @ResponseBody
@@ -37,8 +41,8 @@ public class LeaveController {
         Leave leave;
         try {
             LocalDate inputStartDate = startDate == null ? LocalDate.now() : LocalDate.parse(startDate, formatter);
-            leave = new Leave(inputStartDate, noOfDays, employeeService.findOne(employeeId), "N");
-            leaveService.save(leave);
+            leave = new Leave(inputStartDate, noOfDays, employeeDAO.findOne(employeeId), "N");
+            leaveDAO.save(leave);
             leaveId = String.valueOf(leave.getId());
         } catch (Exception e) {
             return "Error creating the leave: " + e.toString();
@@ -53,13 +57,13 @@ public class LeaveController {
                          @RequestParam(required = false) Integer noOfDays) {
         Leave retrievedLeave;
         try {
-            retrievedLeave = leaveService.findOne(id);
+            retrievedLeave = leaveDAO.findOne(id);
             LocalDate modifiedStartDate = startDate == null ? retrievedLeave.getStartDate() : LocalDate.parse(startDate, formatter);
             Integer modifiedNoOfDays = noOfDays == null ? retrievedLeave.getNoOfDays() : noOfDays;
             retrievedLeave.setStartDate(modifiedStartDate);
             retrievedLeave.setNoOfDays(modifiedNoOfDays);
             retrievedLeave.setEndDate(modifiedStartDate.plusDays(modifiedNoOfDays));
-            leaveService.save(retrievedLeave);
+            leaveDAO.save(retrievedLeave);
         } catch (Exception e) {
             return "Error creating the leave: " + e.toString();
         }
@@ -70,7 +74,7 @@ public class LeaveController {
     @ResponseBody
     public String delete(@PathVariable long id) {
         try {
-            leaveService.delete(new Leave(id));
+            leaveDAO.delete(new Leave(id));
         } catch (Exception e) {
             return "Error deleting the leave: " + e.toString();
         }
@@ -86,8 +90,7 @@ public class LeaveController {
         try {
             LocalDate inputStartDate = LocalDate.parse(startDate, formatter);
             LocalDate calcEndDate = inputStartDate.plusDays(noOfDays);
-            List<Leave> retrievedLeaves = leaveService.findByStartDateBetween(inputStartDate, calcEndDate);
-             finalListOfLeaves = retrievedLeaves.stream().filter(leave -> (leave.getEmployee().getId() == employeeId)).collect(Collectors.toList());
+             finalListOfLeaves = leaveService.findByStartDateBetweenForEmployeeId(inputStartDate, calcEndDate, employeeId);
         } catch (Exception e) {
             return "Error deleting the leave: " + e.toString();
         }

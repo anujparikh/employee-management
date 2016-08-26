@@ -1,7 +1,7 @@
-package ems.controllers;
+package ems.controller;
 
 import ems.domain.Employee;
-import ems.services.EmployeeService;
+import ems.dao.EmployeeDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.stereotype.Controller;
@@ -19,7 +19,7 @@ public class EmployeeController implements ErrorController {
     private static final String PATH = "/error";
 
     @Autowired
-    private EmployeeService employeeService;
+    private EmployeeDAO employeeDAO;
 
     @RequestMapping("/create")
     @ResponseBody
@@ -33,7 +33,7 @@ public class EmployeeController implements ErrorController {
         Employee employee;
         try {
             employee = new Employee(firstName, lastName, email, teamId, role, managerId);
-            employeeService.save(employee);
+            employeeDAO.save(employee);
             employeeId = String.valueOf(employee.getId());
         } catch (Exception e) {
             return "Error creating the user: " + e.toString();
@@ -51,14 +51,14 @@ public class EmployeeController implements ErrorController {
                          @RequestParam(value = "role", required = false) String role,
                          @RequestParam(value = "managerId", required = false) String managerId) {
         try {
-            Employee employeeToBeUpdated = employeeService.findOne(id);
+            Employee employeeToBeUpdated = employeeDAO.findOne(id);
             if (firstName != null) employeeToBeUpdated.setFirstName(firstName);
             if (lastName != null) employeeToBeUpdated.setLastName(lastName);
             if (email != null) employeeToBeUpdated.setEmail(email);
             if (teamId != null) employeeToBeUpdated.setTeamId(teamId);
             if (role != null) employeeToBeUpdated.setRole(role);
             if (managerId != null) employeeToBeUpdated.setManagerId(managerId);
-            employeeService.save(employeeToBeUpdated);
+            employeeDAO.save(employeeToBeUpdated);
         } catch (Exception e) {
             return "Error updating the user: " + e.toString();
         }
@@ -69,7 +69,7 @@ public class EmployeeController implements ErrorController {
     @ResponseBody
     public String delete(@PathVariable("id") long id) {
         try {
-            employeeService.delete(new Employee(id));
+            employeeDAO.delete(new Employee(id));
         } catch (Exception e) {
             return "Error deleting the user: " + e.toString();
         }
@@ -81,7 +81,7 @@ public class EmployeeController implements ErrorController {
     public String findOneById(@PathVariable("id") long id) {
         Employee retrievedEmployee;
         try {
-            retrievedEmployee = employeeService.findOne(id);
+            retrievedEmployee = employeeDAO.findOne(id);
         } catch (Exception e) {
             return "Error fetching the employee";
         }
@@ -93,7 +93,7 @@ public class EmployeeController implements ErrorController {
     public String findByTeamId(@PathVariable String teamId) {
         List<Employee> retrievedEmployeeList;
         try {
-            retrievedEmployeeList = employeeService.findByTeamId(teamId);
+            retrievedEmployeeList = employeeDAO.findByTeamId(teamId);
         } catch (Exception e) {
             return "Error fetching the employee";
         }
@@ -105,7 +105,7 @@ public class EmployeeController implements ErrorController {
     public String findByRole(@PathVariable String role) {
         List<Employee> retrievedEmployeeList;
         try {
-            retrievedEmployeeList = employeeService.findByRole(role);
+            retrievedEmployeeList = employeeDAO.findByRole(role);
         } catch (Exception e) {
             return "Error fetching the employee";
         }
@@ -117,7 +117,7 @@ public class EmployeeController implements ErrorController {
     public String findByManagerId(@PathVariable long managerId) {
         List<Employee> retrievedEmployeeList;
         try {
-            retrievedEmployeeList = employeeService.findByManagerId(managerId);
+            retrievedEmployeeList = employeeDAO.findByManagerId(managerId);
         } catch (Exception e) {
             return "Error fetching the employee";
         }

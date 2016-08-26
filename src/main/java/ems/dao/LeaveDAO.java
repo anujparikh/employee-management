@@ -1,4 +1,4 @@
-package ems.services;
+package ems.dao;
 
 import ems.domain.Leave;
 import org.springframework.data.repository.CrudRepository;
@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-@Repository
 @Transactional
-public interface LeaveService extends CrudRepository<Leave, Long> {
+@Repository
+public interface LeaveDAO extends CrudRepository<Leave, Long> {
 
     public List<Leave> findByTeamId(String teamId);
 

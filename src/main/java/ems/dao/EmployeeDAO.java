@@ -1,4 +1,4 @@
-package ems.services;
+package ems.dao;
 
 import ems.domain.Employee;
 import org.springframework.data.repository.CrudRepository;
@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Repository
 @Transactional
-public interface EmployeeService extends CrudRepository<Employee, Long> {
+@Repository
+public interface EmployeeDAO extends CrudRepository<Employee, Long> {
 
     public List<Employee> findByRole (String role);
 
