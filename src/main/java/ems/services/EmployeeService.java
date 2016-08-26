@@ -15,5 +15,5 @@ public interface EmployeeService extends CrudRepository<Employee, Long> {
 
     public List<Employee> findByTeamId (String teamId);
 
-    public List<Employee> findByManagerId (String managerId);
+    public List<Employee> findByManagerId (long managerId);
 }

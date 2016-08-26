@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 
 @Controller
+@RequestMapping("/employeecontroller")
 public class EmployeeController implements ErrorController {
 
     private static final String PATH = "/error";
@@ -87,9 +88,9 @@ public class EmployeeController implements ErrorController {
         return "Retrieved Employee with employee first name: " + retrievedEmployee.getFirstName();
     }
 
-    @RequestMapping("/team/{teamId}")
+    @RequestMapping("/{teamId}/team-list")
     @ResponseBody
-    public String findByTeamId(@PathVariable("teamId") String teamId) {
+    public String findByTeamId(@PathVariable String teamId) {
         List<Employee> retrievedEmployeeList;
         try {
             retrievedEmployeeList = employeeService.findByTeamId(teamId);
@@ -99,9 +100,9 @@ public class EmployeeController implements ErrorController {
         return "Total Retrieved Employees for team with id " + teamId + " is " + retrievedEmployeeList.size();
     }
 
-    @RequestMapping("/role/{role}")
+    @RequestMapping("/{role}/role-list")
     @ResponseBody
-    public String findByRole(@PathVariable("role") String role) {
+    public String findByRole(@PathVariable String role) {
         List<Employee> retrievedEmployeeList;
         try {
             retrievedEmployeeList = employeeService.findByRole(role);
@@ -111,9 +112,9 @@ public class EmployeeController implements ErrorController {
         return "Total Retrieved Employees for role " + role + " is " + retrievedEmployeeList.size();
     }
 
-    @RequestMapping("/manager/{managerId}")
+    @RequestMapping("/{managerId}/employees")
     @ResponseBody
-    public String findByManagerId(@PathVariable("managerId") String managerId) {
+    public String findByManagerId(@PathVariable long managerId) {
         List<Employee> retrievedEmployeeList;
         try {
             retrievedEmployeeList = employeeService.findByManagerId(managerId);
