@@ -34,6 +34,6 @@ public class LeaveService {
     }
 
     private static List<Long> getApproverIdList(Leave input) {
-        return input.getApproverEmployeeIdList().parallelStream().map(employee -> employee.getId()).collect(Collectors.toList());
+        return input.getApproverEmployeeIdList().parallelStream().map(Employee::getId).collect(Collectors.toList());
     }
 }
