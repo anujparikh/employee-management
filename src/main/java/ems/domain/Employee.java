@@ -5,8 +5,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @Entity
@@ -36,16 +34,6 @@ public class Employee {
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "manager_id")
     private Employee manager;
-
-    @OneToMany(mappedBy="manager")
-    private Set<Employee> subordinates = new HashSet<>();
-
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "leave_employee_map",
-            joinColumns = @JoinColumn(name = "approver_employee_id", referencedColumnName = "manager_id"),
-            inverseJoinColumns = @JoinColumn(name = "leave_id", referencedColumnName = "id")
-    )
-    private Set<Leave> leaves;
 
     public Employee(String firstName, String lastName, String email, String teamId, String role, Employee manager) {
         this.firstName = firstName;

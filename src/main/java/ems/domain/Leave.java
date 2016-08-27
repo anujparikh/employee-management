@@ -36,9 +36,12 @@ public class Leave {
     private String autoDeducted;
     private String teamId;
 
-    @ManyToMany(mappedBy = "leaves")
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "leave_employee_map",
+            joinColumns = @JoinColumn(name = "leave_id"),
+            inverseJoinColumns = @JoinColumn(name = "approver_employee_id")
+    )
     private Set<Employee> approverEmployeeIdList;
-
 
     public Leave(long id) {
         this.id = id;
