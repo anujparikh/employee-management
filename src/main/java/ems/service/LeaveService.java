@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Transactional
 @Service
@@ -25,5 +27,13 @@ public class LeaveService {
 
     public Set<Employee> findApproverSetByLeaveId(Long leaveId) {
         return leaveDAO.findOne(leaveId).getApproverEmployeeIdList();
+    }
+
+    public Set<Leave> findLeaveSetByEmployeeId(Long employeeId) {
+        return StreamSupport.stream(leaveDAO.findAll().spliterator(), true).filter(leave -> getApproverIdList(leave).contains(employeeId)).collect(Collectors.toSet());
+    }
+
+    private static List<Long> getApproverIdList(Leave input) {
+        return input.getApproverEmployeeIdList().parallelStream().map(employee -> employee.getId()).collect(Collectors.toList());
     }
 }

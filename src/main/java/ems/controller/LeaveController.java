@@ -122,15 +122,15 @@ public class LeaveController {
         return "Total Approvers for " + leaveId + " is " + retrievedApproverSet.size();
     }
 
-//    @RequestMapping("/assigned/{approverId}")
-//    @ResponseBody
-//    public String findByApproverEmployeeId(@PathVariable Long approverId) {
-//        Set<Leave> retrievedLeaveSet;
-//        try {
-//            retrievedLeaveSet = leaveDAO.findByApproverEmployeeId(approverId);
-//        } catch (Exception e) {
-//            return "Error fetching the employee";
-//        }
-//        return "Total Leaves to be approved by " + approverId + " is " + retrievedLeaveSet.size();
-//    }
+    @RequestMapping("/assigned/{approverId}")
+    @ResponseBody
+    public String findByApproverEmployeeId(@PathVariable Long approverId) {
+        Set<Leave> retrievedLeaveSet;
+        try {
+            retrievedLeaveSet = leaveService.findLeaveSetByEmployeeId(approverId);
+        } catch (Exception e) {
+            return "Error fetching the employee";
+        }
+        return "Total Leaves to be approved by " + approverId + " is " + retrievedLeaveSet.size();
+    }
 }
