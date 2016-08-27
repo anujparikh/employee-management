@@ -1,9 +1,9 @@
 package ems.controller;
 
-import ems.domain.Employee;
-import ems.domain.Leave;
 import ems.dao.EmployeeDAO;
 import ems.dao.LeaveDAO;
+import ems.domain.Employee;
+import ems.domain.Leave;
 import ems.service.LeaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -37,7 +36,7 @@ public class LeaveController {
     @ResponseBody
     public String create(@RequestParam(name = "startDate", required = false) String startDate,
                          int noOfDays,
-                         long employeeId) {
+                         Long employeeId) {
         String leaveId = "";
         Leave leave;
         try {
@@ -54,7 +53,7 @@ public class LeaveController {
 
     @RequestMapping("/update/{id}")
     @ResponseBody
-    public String update(@PathVariable long id,
+    public String update(@PathVariable Long id,
                          @RequestParam(required = false) String startDate,
                          @RequestParam(required = false) Integer noOfDays) {
         Leave retrievedLeave;
@@ -74,7 +73,7 @@ public class LeaveController {
 
     @RequestMapping("/delete/{id}")
     @ResponseBody
-    public String delete(@PathVariable long id) {
+    public String delete(@PathVariable Long id) {
         try {
             leaveDAO.delete(new Leave(id));
         } catch (Exception e) {
@@ -87,8 +86,8 @@ public class LeaveController {
     @ResponseBody
     public String range(String startDate,
                          Integer noOfDays,
-                         long employeeId) {
-        List<Leave> finalListOfLeaves;
+                         Long employeeId) {
+        Set<Leave> finalListOfLeaves;
         try {
             LocalDate inputStartDate = LocalDate.parse(startDate, formatter);
             LocalDate calcEndDate = inputStartDate.plusDays(noOfDays);
@@ -110,4 +109,28 @@ public class LeaveController {
         }
         return "Total Retrieved Leaves for team with id " + teamId + " is " + retrievedLeaveList.size();
     }
+
+    @RequestMapping("/{leaveId}/approver-list")
+    @ResponseBody
+    public String findApproverListByLeaveId(@PathVariable Long leaveId) {
+        Set<Employee> retrievedApproverSet;
+        try {
+            retrievedApproverSet = leaveService.findApproverSetByLeaveId(leaveId);
+        } catch (Exception e) {
+            return "Error fetching the employee";
+        }
+        return "Total Approvers for " + leaveId + " is " + retrievedApproverSet.size();
+    }
+
+//    @RequestMapping("/assigned/{approverId}")
+//    @ResponseBody
+//    public String findByApproverEmployeeId(@PathVariable Long approverId) {
+//        Set<Leave> retrievedLeaveSet;
+//        try {
+//            retrievedLeaveSet = leaveDAO.findByApproverEmployeeId(approverId);
+//        } catch (Exception e) {
+//            return "Error fetching the employee";
+//        }
+//        return "Total Leaves to be approved by " + approverId + " is " + retrievedLeaveSet.size();
+//    }
 }

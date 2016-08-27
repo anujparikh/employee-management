@@ -58,7 +58,6 @@ public class EmployeeController implements ErrorController {
             if (email != null) employeeToBeUpdated.setEmail(email);
             if (teamId != null) employeeToBeUpdated.setTeamId(teamId);
             if (role != null) employeeToBeUpdated.setRole(role);
-            System.out.println("manager: " + employeeDAO.findOne(managerId));
             if (managerId != null) employeeToBeUpdated.setManager(employeeDAO.findOne(managerId));
             employeeDAO.save(employeeToBeUpdated);
         } catch (Exception e) {
