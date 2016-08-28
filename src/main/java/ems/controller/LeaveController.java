@@ -23,14 +23,16 @@ public class LeaveController {
     private static final String DATE_PATTERN = "MM-dd-yyyy";
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
-    @Autowired
-    private LeaveDAO leaveDAO;
+    private final LeaveDAO leaveDAO;
+    private final EmployeeDAO employeeDAO;
+    private final LeaveService leaveService;
 
     @Autowired
-    private EmployeeDAO employeeDAO;
-
-    @Autowired
-    private LeaveService leaveService;
+    public LeaveController(LeaveDAO leaveDAO, EmployeeDAO employeeDAO, LeaveService leaveService) {
+        this.leaveDAO = leaveDAO;
+        this.employeeDAO = employeeDAO;
+        this.leaveService = leaveService;
+    }
 
     @RequestMapping("/create")
     @ResponseBody
