@@ -2,6 +2,7 @@ package ems.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "employee")
 @NoArgsConstructor
+@Component
 public class Employee {
 
     @Id

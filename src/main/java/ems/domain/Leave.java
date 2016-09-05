@@ -2,6 +2,7 @@ package ems.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -12,6 +13,7 @@ import java.util.Set;
 @Entity
 @Table(name = "leave_tbl")
 @NoArgsConstructor
+@Component
 public class Leave {
 
     @Id
