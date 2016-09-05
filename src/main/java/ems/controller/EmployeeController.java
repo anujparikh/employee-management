@@ -18,8 +18,12 @@ public class EmployeeController implements ErrorController {
 
     private static final String PATH = "/error";
 
+    private final EmployeeDAO employeeDAO;
+
     @Autowired
-    private EmployeeDAO employeeDAO;
+    public EmployeeController(EmployeeDAO employeeDAO) {
+        this.employeeDAO = employeeDAO;
+    }
 
     @RequestMapping("/create")
     @ResponseBody
