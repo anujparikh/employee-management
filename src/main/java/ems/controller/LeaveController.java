@@ -34,31 +34,43 @@ public class LeaveController {
         this.leaveService = leaveService;
     }
 
+    /**
+     *
+     * @param startDate - leave start date
+     * @param noOfDays - total number of leaves applied
+     * @param employeeId - employee id applying for leave
+     * @return - New Created Leave
+     */
     @RequestMapping("/create")
     @ResponseBody
-    public String create(@RequestParam(name = "startDate", required = false) String startDate,
+    public Leave create(@RequestParam(name = "startDate", required = false) String startDate,
                          int noOfDays,
                          Long employeeId) {
-        String leaveId = "";
         Leave leave;
         try {
             LocalDate inputStartDate = startDate == null ? LocalDate.now() : LocalDate.parse(startDate, formatter);
             Employee retrievedEmployee = employeeDAO.findOne(employeeId);
             leave = new Leave(inputStartDate, noOfDays, retrievedEmployee, "N", employeeDAO.findByTeamId(retrievedEmployee.getTeamId()));
             leaveDAO.save(leave);
-            leaveId = String.valueOf(leave.getId());
         } catch (Exception e) {
-            return "Error creating the leave: " + e.toString();
+            return null;
         }
-        return "Leave successfully created with id = " + leaveId;
+        return leave;
     }
 
+    /**
+     *
+     * @param id - leave id
+     * @param startDate - modified start date (optional)
+     * @param noOfDays - modified no of days (optional)
+     * @return - updated leave
+     */
     @RequestMapping("/update/{id}")
     @ResponseBody
-    public String update(@PathVariable Long id,
+    public Leave update(@PathVariable Long id,
                          @RequestParam(required = false) String startDate,
                          @RequestParam(required = false) Integer noOfDays) {
-        Leave retrievedLeave;
+        Leave retrievedLeave, updatedLeave;
         try {
             retrievedLeave = leaveDAO.findOne(id);
             LocalDate modifiedStartDate = startDate == null ? retrievedLeave.getStartDate() : LocalDate.parse(startDate, formatter);
@@ -66,40 +78,60 @@ public class LeaveController {
             retrievedLeave.setStartDate(modifiedStartDate);
             retrievedLeave.setNoOfDays(modifiedNoOfDays);
             retrievedLeave.setEndDate(modifiedStartDate.plusDays(modifiedNoOfDays));
-            leaveDAO.save(retrievedLeave);
+            updatedLeave = leaveDAO.save(retrievedLeave);
         } catch (Exception e) {
-            return "Error creating the leave: " + e.toString();
+            return null;
         }
-        return "updated leave successfully with id = " + id;
+        return updatedLeave;
     }
 
+    /**
+     *
+     * @param id - leave id for leave to be deleted
+     * @return - Boolean - successful or failure
+     */
     @RequestMapping("/delete/{id}")
     @ResponseBody
-    public String delete(@PathVariable Long id) {
+    public Boolean delete(@PathVariable Long id) {
         try {
             leaveDAO.delete(new Leave(id));
         } catch (Exception e) {
-            return "Error deleting the leave: " + e.toString();
+            return false;
         }
-        return "Deleted leave successfully with id = " + id;
+        return true;
     }
 
+    /**
+     *
+     * @param startDate - start date of the range of leaves to be retrieved
+     * @param noOfDays - total no of days to calculate end date of range
+     * @param employeeId - employee id for which leaves needs to be fetched
+     * @return - Set of retrieved leaves
+     */
     @RequestMapping("/range")
     @ResponseBody
-    public String range(String startDate,
-                         Integer noOfDays,
-                         Long employeeId) {
+    public Set<Leave> range(String startDate,
+                        Integer noOfDays,
+                        Long employeeId) {
         Set<Leave> finalListOfLeaves;
         try {
             LocalDate inputStartDate = LocalDate.parse(startDate, formatter);
             LocalDate calcEndDate = inputStartDate.plusDays(noOfDays);
-             finalListOfLeaves = leaveService.findByStartDateBetweenForEmployeeId(inputStartDate, calcEndDate, employeeId);
+            finalListOfLeaves = leaveService.findByStartDateBetweenForEmployeeId(inputStartDate, calcEndDate, employeeId);
+            finalListOfLeaves.forEach(i -> {
+                System.out.println("No of days for " + i.getEmployee().getFirstName() + " is: " + i.getNoOfDays());
+            });
         } catch (Exception e) {
-            return "Error deleting the leave: " + e.toString();
+            return null;
         }
-        return "leave successfully with size = " + finalListOfLeaves.size();
+        return finalListOfLeaves;
     }
 
+    /**
+     *
+     * @param teamId - team id for which all the leaves are to be retrieved
+     * @return - Set of leaves for particular team id
+     */
     @RequestMapping("/{teamId}/team-list")
     @ResponseBody
     public String findByTeamId(@PathVariable String teamId) {
@@ -112,27 +144,37 @@ public class LeaveController {
         return "Total Retrieved Leaves for team with id " + teamId + " is " + retrievedLeaveList.size();
     }
 
+    /**
+     *
+     * @param leaveId - leave id for which approvers list needs to be retrieved
+     * @return - Set of Employees who are approvers for the leave id passed
+     */
     @RequestMapping("/{leaveId}/approver-list")
     @ResponseBody
-    public String findApproverListByLeaveId(@PathVariable Long leaveId) {
+    public Set<Employee> findApproverListByLeaveId(@PathVariable Long leaveId) {
         Set<Employee> retrievedApproverSet;
         try {
             retrievedApproverSet = leaveService.findApproverSetByLeaveId(leaveId);
         } catch (Exception e) {
-            return "Error fetching the employee";
+            return null;
         }
-        return "Total Approvers for " + leaveId + " is " + retrievedApproverSet.size();
+        return retrievedApproverSet;
     }
 
+    /**
+     *
+     * @param approverId - approved id for which leaves to be retrieved for approval
+     * @return - Set of Leaves for that approved id
+     */
     @RequestMapping("/assigned/{approverId}")
     @ResponseBody
-    public String findByApproverEmployeeId(@PathVariable Long approverId) {
+    public Set<Leave> findByApproverEmployeeId(@PathVariable Long approverId) {
         Set<Leave> retrievedLeaveSet;
         try {
             retrievedLeaveSet = leaveService.findLeaveSetByEmployeeId(approverId);
         } catch (Exception e) {
-            return "Error fetching the employee";
+            return null;
         }
-        return "Total Leaves to be approved by " + approverId + " is " + retrievedLeaveSet.size();
+        return retrievedLeaveSet;
     }
 }
