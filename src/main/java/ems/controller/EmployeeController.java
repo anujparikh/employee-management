@@ -18,9 +18,9 @@ public class EmployeeController implements ErrorController {
 
     private static final String PATH = "/error";
 
-    @Autowired
     private final EmployeeDAO employeeDAO;
 
+    @Autowired
     public EmployeeController(EmployeeDAO employeeDAO) {
         this.employeeDAO = employeeDAO;
     }
