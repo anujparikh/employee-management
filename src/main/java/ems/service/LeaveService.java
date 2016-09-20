@@ -36,4 +36,8 @@ public class LeaveService {
     private static List<Long> getApproverIdList(Leave input) {
         return input.getApproverEmployeeIdList().parallelStream().map(Employee::getId).collect(Collectors.toList());
     }
+
+    public Boolean isLeaveExist(Leave leave) {
+        return leaveDAO.findOne(leave.getId()) != null;
+    }
 }

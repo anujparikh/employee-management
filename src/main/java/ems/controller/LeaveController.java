@@ -2,22 +2,20 @@ package ems.controller;
 
 import ems.dao.EmployeeDAO;
 import ems.dao.LeaveDAO;
-import ems.domain.Employee;
 import ems.domain.Leave;
 import ems.service.LeaveService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
-@Controller
-@RequestMapping("/leavecontroller")
+@RestController
 public class LeaveController {
 
     private static final String DATE_PATTERN = "MM-dd-yyyy";
@@ -35,84 +33,118 @@ public class LeaveController {
     }
 
     /**
-     *
-     * @param startDate - leave start date
-     * @param noOfDays - total number of leaves applied
-     * @param employeeId - employee id applying for leave
-     * @return - New Created Leave
+     * @return list of all leaves
      */
-    @RequestMapping("/create")
-    @ResponseBody
-    public Leave create(@RequestParam(name = "startDate", required = false) String startDate,
-                         int noOfDays,
-                         Long employeeId) {
-        Leave leave;
+    @RequestMapping(value = "/leave/", method = RequestMethod.GET)
+    public ResponseEntity<Set<Leave>> listAllLeaves() {
+        Set<Leave> listOfLeaves;
         try {
-            LocalDate inputStartDate = startDate == null ? LocalDate.now() : LocalDate.parse(startDate, formatter);
-            Employee retrievedEmployee = employeeDAO.findOne(employeeId);
-            leave = new Leave(inputStartDate, noOfDays, retrievedEmployee, "N", employeeDAO.findByTeamId(retrievedEmployee.getTeamId()));
-            leaveDAO.save(leave);
+            listOfLeaves = (Set<Leave>) leaveDAO.findAll();
+            listOfLeaves.forEach(i -> {
+                System.out.println("Leave id: " + i.getId());
+            });
         } catch (Exception e) {
-            return null;
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return leave;
+        return new ResponseEntity<>(listOfLeaves, HttpStatus.OK);
     }
 
     /**
-     *
-     * @param id - leave id
-     * @param startDate - modified start date (optional)
-     * @param noOfDays - modified no of days (optional)
+     * @param leaveId - leave id for which leave needs to be retrieved
+     * @return - Leave for particular leave id
+     */
+    @RequestMapping(value = "/leave/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Leave> getLeave(@PathVariable("id") Long leaveId) {
+        Leave retrievedLeave;
+        try {
+            retrievedLeave = leaveDAO.findOne(leaveId);
+            System.out.println("Name: " + retrievedLeave.getEmployee().getFirstName() + " leave id: " + retrievedLeave.getId());
+        } catch (Exception e) {
+            return new ResponseEntity<Leave>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<Leave>(retrievedLeave, HttpStatus.OK);
+    }
+
+    /**
+     * @param leave
+     * @param uriComponentsBuilder
+     * @return - new leave created
+     */
+    @RequestMapping(value = "/leave/", method = RequestMethod.POST)
+    public ResponseEntity<Leave> createLeave(@RequestBody Leave leave, UriComponentsBuilder uriComponentsBuilder) {
+        if (leaveService.isLeaveExist(leave)) {
+            return new ResponseEntity<Leave>(HttpStatus.CONFLICT);
+        }
+        try {
+            leaveDAO.save(leave);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(uriComponentsBuilder.path("/leave/{id}").buildAndExpand(leave.getId()).toUri());
+            return new ResponseEntity<Leave>(headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<Leave>(HttpStatus.NO_CONTENT);
+        }
+    }
+
+    /**
+     * @param id
+     * @param leave
      * @return - updated leave
      */
-    @RequestMapping("/update/{id}")
-    @ResponseBody
-    public Leave update(@PathVariable Long id,
-                         @RequestParam(required = false) String startDate,
-                         @RequestParam(required = false) Integer noOfDays) {
-        Leave retrievedLeave, updatedLeave;
-        try {
-            retrievedLeave = leaveDAO.findOne(id);
-            LocalDate modifiedStartDate = startDate == null ? retrievedLeave.getStartDate() : LocalDate.parse(startDate, formatter);
-            Integer modifiedNoOfDays = noOfDays == null ? retrievedLeave.getNoOfDays() : noOfDays;
-            retrievedLeave.setStartDate(modifiedStartDate);
-            retrievedLeave.setNoOfDays(modifiedNoOfDays);
-            retrievedLeave.setEndDate(modifiedStartDate.plusDays(modifiedNoOfDays));
-            updatedLeave = leaveDAO.save(retrievedLeave);
-        } catch (Exception e) {
-            return null;
+    @RequestMapping(value = "/leave/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<Leave> update(@PathVariable Long id, @RequestBody Leave leave) {
+        Leave currentLeaveToBeUpdated = leaveDAO.findOne(id);
+
+        if (currentLeaveToBeUpdated == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return updatedLeave;
+
+        try {
+            currentLeaveToBeUpdated.setStartDate(leave.getStartDate());
+            currentLeaveToBeUpdated.setEndDate(leave.getEndDate());
+            currentLeaveToBeUpdated.setApproverEmployeeIdList(leave.getApproverEmployeeIdList());
+            currentLeaveToBeUpdated.setApprovalStatus(leave.getApprovalStatus());
+            currentLeaveToBeUpdated.setAutoDeducted(leave.getAutoDeducted());
+            leaveDAO.save(currentLeaveToBeUpdated); // TODO: need to add a method in service for updation
+
+        } catch (Exception e) {
+            return new ResponseEntity<Leave>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<Leave>(currentLeaveToBeUpdated, HttpStatus.OK);
     }
 
     /**
-     *
      * @param id - leave id for leave to be deleted
      * @return - Boolean - successful or failure
      */
-    @RequestMapping("/delete/{id}")
-    @ResponseBody
-    public Boolean delete(@PathVariable Long id) {
-        try {
-            leaveDAO.delete(new Leave(id));
-        } catch (Exception e) {
-            return false;
+    @RequestMapping(value = "/leave/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Leave> delete(@PathVariable("id") Long id) {
+        Leave retrievedLeaveToBeDeleted = leaveDAO.findOne(id);
+
+        if (retrievedLeaveToBeDeleted == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return true;
+
+        try {
+            leaveDAO.delete(new Leave(id)); // TODO: need to add a method in service for deleting leave
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    //TODO: Implement DeleteAll Method in controller
+
     /**
-     *
-     * @param startDate - start date of the range of leaves to be retrieved
-     * @param noOfDays - total no of days to calculate end date of range
+     * @param startDate  - start date of the range of leaves to be retrieved
+     * @param noOfDays   - total no of days to calculate end date of range
      * @param employeeId - employee id for which leaves needs to be fetched
      * @return - Set of retrieved leaves
-     */
+     *//*
     @RequestMapping("/range")
     @ResponseBody
     public Set<Leave> range(String startDate,
-                        Integer noOfDays,
-                        Long employeeId) {
+                            Integer noOfDays,
+                            Long employeeId) {
         Set<Leave> finalListOfLeaves;
         try {
             LocalDate inputStartDate = LocalDate.parse(startDate, formatter);
@@ -127,11 +159,10 @@ public class LeaveController {
         return finalListOfLeaves;
     }
 
-    /**
-     *
+    *//**
      * @param teamId - team id for which all the leaves are to be retrieved
      * @return - Set of leaves for particular team id
-     */
+     *//*
     @RequestMapping("/{teamId}/team-list")
     @ResponseBody
     public String findByTeamId(@PathVariable String teamId) {
@@ -144,11 +175,10 @@ public class LeaveController {
         return "Total Retrieved Leaves for team with id " + teamId + " is " + retrievedLeaveList.size();
     }
 
-    /**
-     *
+    *//**
      * @param leaveId - leave id for which approvers list needs to be retrieved
      * @return - Set of Employees who are approvers for the leave id passed
-     */
+     *//*
     @RequestMapping("/{leaveId}/approver-list")
     @ResponseBody
     public Set<Employee> findApproverListByLeaveId(@PathVariable Long leaveId) {
@@ -161,11 +191,10 @@ public class LeaveController {
         return retrievedApproverSet;
     }
 
-    /**
-     *
+    *//**
      * @param approverId - approved id for which leaves to be retrieved for approval
      * @return - Set of Leaves for that approved id
-     */
+     *//*
     @RequestMapping("/assigned/{approverId}")
     @ResponseBody
     public Set<Leave> findByApproverEmployeeId(@PathVariable Long approverId) {
@@ -176,5 +205,5 @@ public class LeaveController {
             return null;
         }
         return retrievedLeaveSet;
-    }
+    }*/
 }
