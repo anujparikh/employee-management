@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+
+//TODO: make service interface and use implementation
 @Transactional
 @Service
 public class LeaveService {
@@ -26,12 +28,12 @@ public class LeaveService {
         return leaveDAO.findByStartDateBetween(startDate, endDate).parallelStream().filter(leave -> leave.getEmployee().getId() == employeeId).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public ArrayList<Employee> findApproverSetByLeaveId(Long leaveId) {
+    public Set<Employee> findApproverSetByLeaveId(Long leaveId) {
         return leaveDAO.findOne(leaveId).getApproverEmployeeIdList();
     }
 
-    public Set<Leave> findLeaveSetByEmployeeId(Long employeeId) {
-        return StreamSupport.stream(leaveDAO.findAll().spliterator(), true).filter(leave -> getApproverIdList(leave).contains(employeeId)).collect(Collectors.toSet());
+    public List<Leave> findLeaveSetByEmployeeId(Long employeeId) {
+        return StreamSupport.stream(leaveDAO.findAll().spliterator(), true).filter(leave -> getApproverIdList(leave).contains(employeeId)).collect(Collectors.toCollection(ArrayList::new));
     }
 
     private static List<Long> getApproverIdList(Leave input) {

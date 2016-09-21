@@ -6,13 +6,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Set;
 
 @Transactional
 @Repository
 public interface LeaveDAO extends PagingAndSortingRepository<Leave, Long> {
 
-    Set<Leave> findByTeamId(String teamId);
+    ArrayList<Leave> findByTeamId(Long teamId);
 
     Set<Leave> findByStartDateBetween(LocalDate startDate, LocalDate endDate);
 }

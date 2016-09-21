@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Set;
 
 @Data
 @Entity
@@ -43,7 +43,7 @@ public class Leave {
             joinColumns = @JoinColumn(name = "leave_id"),
             inverseJoinColumns = @JoinColumn(name = "approver_employee_id")
     )
-    private ArrayList<Employee> approverEmployeeIdList;
+    private Set<Employee> approverEmployeeIdList;
 
     public Leave(LocalDate startDate,
                  LocalDate endDate,

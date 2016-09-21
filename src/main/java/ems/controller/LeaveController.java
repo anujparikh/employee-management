@@ -2,6 +2,7 @@ package ems.controller;
 
 import ems.dao.EmployeeDAO;
 import ems.dao.LeaveDAO;
+import ems.domain.Employee;
 import ems.domain.Leave;
 import ems.service.LeaveService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class LeaveController {
@@ -53,6 +55,12 @@ public class LeaveController {
         return new ResponseEntity<>(listOfLeaves, HttpStatus.OK);
     }
 
+    /**
+     * @param startDate  - start date of the range of leaves to be retrieved
+     * @param noOfDays   - total no of days to calculate end date of range
+     * @param employeeId - employee id for which leaves needs to be fetched
+     * @return - Set of retrieved leaves
+     */
     @RequestMapping(value = "/leave/range", method = RequestMethod.GET)
     public ResponseEntity<List<Leave>> listAllLeavesWithinRange(String startDate,
                                                                 Integer noOfDays,
@@ -87,6 +95,25 @@ public class LeaveController {
             return new ResponseEntity<Leave>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<Leave>(retrievedLeave, HttpStatus.OK);
+    }
+
+    /**
+     * @param leaveId
+     * @return - List of leaves for particular team
+     */
+    @RequestMapping(value = "/leave/team/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ArrayList<Leave>> getLeaveByTeamId(@PathVariable("id") Long leaveId) {
+        System.out.println("Inside fetch leave by id");
+        ArrayList<Leave> listOfLeaves;
+        try {
+            listOfLeaves = leaveDAO.findByTeamId(leaveId);
+            listOfLeaves.forEach(i -> {
+                System.out.println("No of days for " + i.getEmployee().getFirstName() + " is: " + i.getNoOfDays());
+            });
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listOfLeaves, HttpStatus.OK);
     }
 
     /**
@@ -159,78 +186,33 @@ public class LeaveController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    //TODO: Implement DeleteAll Method in controller
-
     /**
-     * @param startDate  - start date of the range of leaves to be retrieved
-     * @param noOfDays   - total no of days to calculate end date of range
-     * @param employeeId - employee id for which leaves needs to be fetched
-     * @return - Set of retrieved leaves
-     *//*
-    @RequestMapping("/range")
-    @ResponseBody
-    public Set<Leave> range(String startDate,
-                            Integer noOfDays,
-                            Long employeeId) {
-        Set<Leave> finalListOfLeaves;
+     * @param id
+     * @return - list of approvers for leave id
+     */
+    @RequestMapping(value = "/leave/approverlist/{id}", method = RequestMethod.GET)
+    public ResponseEntity<Set<Employee>> findApproverListByLeaveId(@PathVariable("id") Long id) {
+        System.out.println("Inside approver list by leave Id");
+        Set<Employee> listOfEmployees;
         try {
-            LocalDate inputStartDate = LocalDate.parse(startDate, formatter);
-            LocalDate calcEndDate = inputStartDate.plusDays(noOfDays);
-            finalListOfLeaves = leaveService.findByStartDateBetweenForEmployeeId(inputStartDate, calcEndDate, employeeId);
-            finalListOfLeaves.forEach(i -> {
-                System.out.println("No of days for " + i.getEmployee().getFirstName() + " is: " + i.getNoOfDays());
-            });
+            listOfEmployees = leaveService.findApproverSetByLeaveId(id);
         } catch (Exception e) {
-            return null;
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return finalListOfLeaves;
+        return new ResponseEntity<>(listOfEmployees, HttpStatus.OK);
     }
 
-    *//**
-     * @param teamId - team id for which all the leaves are to be retrieved
-     * @return - Set of leaves for particular team id
-     *//*
-    @RequestMapping("/{teamId}/team-list")
-    @ResponseBody
-    public String findByTeamId(@PathVariable String teamId) {
-        Set<Leave> retrievedLeaveList;
+    @RequestMapping(value = "/leave/assigned/{id}")
+    public ResponseEntity<List<Leave>> findByApproverEmployeeId(@PathVariable("id") Long id) {
+        List<Leave> listOfLeaves;
+
         try {
-            retrievedLeaveList = leaveDAO.findByTeamId(teamId);
+            listOfLeaves = leaveService.findLeaveSetByEmployeeId(id);
         } catch (Exception e) {
-            return "Error fetching the employee";
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return "Total Retrieved Leaves for team with id " + teamId + " is " + retrievedLeaveList.size();
+        return new ResponseEntity<>(listOfLeaves, HttpStatus.OK);
     }
 
-    *//**
-     * @param leaveId - leave id for which approvers list needs to be retrieved
-     * @return - Set of Employees who are approvers for the leave id passed
-     *//*
-    @RequestMapping("/{leaveId}/approver-list")
-    @ResponseBody
-    public Set<Employee> findApproverListByLeaveId(@PathVariable Long leaveId) {
-        Set<Employee> retrievedApproverSet;
-        try {
-            retrievedApproverSet = leaveService.findApproverSetByLeaveId(leaveId);
-        } catch (Exception e) {
-            return null;
-        }
-        return retrievedApproverSet;
-    }
-
-    *//**
-     * @param approverId - approved id for which leaves to be retrieved for approval
-     * @return - Set of Leaves for that approved id
-     *//*
-    @RequestMapping("/assigned/{approverId}")
-    @ResponseBody
-    public Set<Leave> findByApproverEmployeeId(@PathVariable Long approverId) {
-        Set<Leave> retrievedLeaveSet;
-        try {
-            retrievedLeaveSet = leaveService.findLeaveSetByEmployeeId(approverId);
-        } catch (Exception e) {
-            return null;
-        }
-        return retrievedLeaveSet;
-    }*/
+    //TODO: Implement DeleteAll Method in controller
 }
