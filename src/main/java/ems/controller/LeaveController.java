@@ -12,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class LeaveController {
@@ -36,12 +38,33 @@ public class LeaveController {
      * @return list of all leaves
      */
     @RequestMapping(value = "/leave/", method = RequestMethod.GET)
-    public ResponseEntity<Set<Leave>> listAllLeaves() {
-        Set<Leave> listOfLeaves;
+    public ResponseEntity<ArrayList<Leave>> listAllLeaves() {
+        System.out.println("Inside fetch all leaves");
+        ArrayList<Leave> listOfLeaves;
         try {
-            listOfLeaves = (Set<Leave>) leaveDAO.findAll();
+            listOfLeaves = (ArrayList<Leave>) leaveDAO.findAll();
+            System.out.println("List of Leveas: " + listOfLeaves);
             listOfLeaves.forEach(i -> {
                 System.out.println("Leave id: " + i.getId());
+            });
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listOfLeaves, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/leave/range", method = RequestMethod.GET)
+    public ResponseEntity<List<Leave>> listAllLeavesWithinRange(String startDate,
+                                                                Integer noOfDays,
+                                                                Long employeeId) {
+        System.out.println("Inside fetch all leaves with range");
+        List<Leave> listOfLeaves;
+        try {
+            LocalDate inputStartDate = LocalDate.parse(startDate, formatter);
+            LocalDate calcEndDate = inputStartDate.plusDays(noOfDays);
+            listOfLeaves = leaveService.findByStartDateBetweenForEmployeeId(inputStartDate, calcEndDate, employeeId);
+            listOfLeaves.forEach(i -> {
+                System.out.println("No of days for " + i.getEmployee().getFirstName() + " is: " + i.getNoOfDays());
             });
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -55,6 +78,7 @@ public class LeaveController {
      */
     @RequestMapping(value = "/leave/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Leave> getLeave(@PathVariable("id") Long leaveId) {
+        System.out.println("Inside fetch leave by id");
         Leave retrievedLeave;
         try {
             retrievedLeave = leaveDAO.findOne(leaveId);
@@ -72,16 +96,17 @@ public class LeaveController {
      */
     @RequestMapping(value = "/leave/", method = RequestMethod.POST)
     public ResponseEntity<Leave> createLeave(@RequestBody Leave leave, UriComponentsBuilder uriComponentsBuilder) {
+        System.out.println("Inside create Leave");
         if (leaveService.isLeaveExist(leave)) {
-            return new ResponseEntity<Leave>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         try {
             leaveDAO.save(leave);
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(uriComponentsBuilder.path("/leave/{id}").buildAndExpand(leave.getId()).toUri());
-            return new ResponseEntity<Leave>(headers, HttpStatus.OK);
+            return new ResponseEntity<>(headers, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<Leave>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
@@ -92,6 +117,7 @@ public class LeaveController {
      */
     @RequestMapping(value = "/leave/{id}", method = RequestMethod.PUT)
     public ResponseEntity<Leave> update(@PathVariable Long id, @RequestBody Leave leave) {
+        System.out.println("Inside update leave");
         Leave currentLeaveToBeUpdated = leaveDAO.findOne(id);
 
         if (currentLeaveToBeUpdated == null) {
@@ -107,9 +133,9 @@ public class LeaveController {
             leaveDAO.save(currentLeaveToBeUpdated); // TODO: need to add a method in service for updation
 
         } catch (Exception e) {
-            return new ResponseEntity<Leave>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<Leave>(currentLeaveToBeUpdated, HttpStatus.OK);
+        return new ResponseEntity<>(currentLeaveToBeUpdated, HttpStatus.OK);
     }
 
     /**
@@ -118,6 +144,7 @@ public class LeaveController {
      */
     @RequestMapping(value = "/leave/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<Leave> delete(@PathVariable("id") Long id) {
+        System.out.println("Inside delete leave");
         Leave retrievedLeaveToBeDeleted = leaveDAO.findOne(id);
 
         if (retrievedLeaveToBeDeleted == null) {
@@ -125,7 +152,7 @@ public class LeaveController {
         }
 
         try {
-            leaveDAO.delete(new Leave(id)); // TODO: need to add a method in service for deleting leave
+            //leaveDAO.delete(new Leave(id)); // TODO: need to add a method in service for deleting leave
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,11 +22,11 @@ public class LeaveService {
     @Autowired
     private LeaveDAO leaveDAO;
 
-    public Set<Leave> findByStartDateBetweenForEmployeeId(LocalDate startDate, LocalDate endDate, Long employeeId) {
-        return leaveDAO.findByStartDateBetween(startDate, endDate).parallelStream().filter(leave -> leave.getEmployee().getId() == employeeId).collect(Collectors.toSet());
+    public ArrayList<Leave> findByStartDateBetweenForEmployeeId(LocalDate startDate, LocalDate endDate, Long employeeId) {
+        return leaveDAO.findByStartDateBetween(startDate, endDate).parallelStream().filter(leave -> leave.getEmployee().getId() == employeeId).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public Set<Employee> findApproverSetByLeaveId(Long leaveId) {
+    public ArrayList<Employee> findApproverSetByLeaveId(Long leaveId) {
         return leaveDAO.findOne(leaveId).getApproverEmployeeIdList();
     }
 

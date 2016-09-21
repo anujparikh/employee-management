@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.ArrayList;
 
 @Data
 @Entity
@@ -43,24 +43,21 @@ public class Leave {
             joinColumns = @JoinColumn(name = "leave_id"),
             inverseJoinColumns = @JoinColumn(name = "approver_employee_id")
     )
-    private Set<Employee> approverEmployeeIdList;
+    private ArrayList<Employee> approverEmployeeIdList;
 
-    public Leave(long id) {
-        this.id = id;
-    }
-
-    public Leave(LocalDate startDate, Integer noOfDays, Employee employee, Set<Employee> approverEmployeeIdList) {
-        this(startDate, noOfDays, employee, "Y", approverEmployeeIdList);
-    }
-
-    public Leave(LocalDate startDate, Integer noOfDays, Employee employee, String autoDeducted, Set<Employee> approverEmployeeIdList) {
-        this.noOfDays = noOfDays;
+    public Leave(LocalDate startDate,
+                 LocalDate endDate,
+                 Employee employee,
+                 Integer noOfDays,
+                 String approvalStatus,
+                 String autoDeducted,
+                 String teamId) {
         this.startDate = startDate;
-        this.endDate = startDate.plusDays(noOfDays);
+        this.endDate = endDate;
         this.employee = employee;
+        this.noOfDays = noOfDays;
+        this.approvalStatus = approvalStatus;
         this.autoDeducted = autoDeducted;
-        this.approvalStatus = "P";
-        this.teamId = employee.getTeamId();
-        this.approverEmployeeIdList = approverEmployeeIdList;
+        this.teamId = teamId;
     }
 }
