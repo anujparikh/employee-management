@@ -131,14 +131,14 @@ public class EmployeeController {
     }
 
     /**
-     * @param id - team id
+     * @param teamId - team id
      * @return - returns list of employees for that team
      */
-    @RequestMapping(value = "/employee/team/id", method = RequestMethod.GET)
-    public ResponseEntity<ArrayList<Employee>> findByTeamId(@PathVariable("id") Long id) {
+    @RequestMapping(value = "/employee/team/{teamId}", method = RequestMethod.GET)
+    public ResponseEntity<ArrayList<Employee>> findByTeamId(@PathVariable("teamId") String teamId) {
         ArrayList<Employee> retrievedEmployees;
         try {
-            retrievedEmployees = employeeDAO.findByTeamId(id);
+            retrievedEmployees = employeeDAO.findByTeamId(teamId);
 
             if (retrievedEmployees.isEmpty()) {
                 return new ResponseEntity<ArrayList<Employee>>(HttpStatus.NO_CONTENT);
@@ -172,7 +172,7 @@ public class EmployeeController {
      * @param id - manager employee id
      * @return - list of employees having
      */
-    @RequestMapping(value = "/employee/manager/id", method = RequestMethod.GET)
+    @RequestMapping(value = "/employee/manager/{id}", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<Employee>> findByManagerId(@PathVariable("id") Long id) {
         ArrayList<Employee> retrievedEmployees;
         try {

@@ -13,7 +13,7 @@ public interface EmployeeDAO extends PagingAndSortingRepository<Employee, Long> 
 
     ArrayList<Employee> findByRole (String role);
 
-    ArrayList<Employee> findByTeamId (Long teamId);
+    ArrayList<Employee> findByTeamId (String teamId);
 
     ArrayList<Employee> findByManagerId (Long managerId);
 }
