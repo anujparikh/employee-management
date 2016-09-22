@@ -33,7 +33,7 @@ public class Employee {
     @NotNull
     private String role;
 
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "manager_id")
     private Employee manager;
 

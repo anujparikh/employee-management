@@ -65,7 +65,7 @@ public class EmployeeController {
      * @param uriComponentsBuilder
      * @return - new Employee created
      */
-    @RequestMapping(value = "/employee/", method = RequestMethod.POST)
+    @RequestMapping(value = "/employee/", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee, UriComponentsBuilder uriComponentsBuilder) {
         System.out.println("Inside create Employee");
         if (employeeService.isEmployeeExist(employee)) {
