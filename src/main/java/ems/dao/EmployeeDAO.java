@@ -5,15 +5,15 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import java.util.ArrayList;
 
 @Transactional
 @Repository
 public interface EmployeeDAO extends PagingAndSortingRepository<Employee, Long> {
 
-    Set<Employee> findByRole (String role);
+    ArrayList<Employee> findByRole (String role);
 
-    Set<Employee> findByTeamId (String teamId);
+    ArrayList<Employee> findByTeamId (Long teamId);
 
-    Set<Employee> findByManagerId (long managerId);
+    ArrayList<Employee> findByManagerId (Long managerId);
 }

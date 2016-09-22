@@ -4,20 +4,21 @@ import ems.dao.EmployeeDAO;
 import ems.domain.Employee;
 import ems.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 @Controller
 @RequestMapping("/employeecontroller")
-public class EmployeeController implements ErrorController {
+public class EmployeeController {
 
     private static final String PATH = "/error";
 
@@ -67,7 +68,6 @@ public class EmployeeController implements ErrorController {
     }
 
     /**
-     *
      * @param employee
      * @param uriComponentsBuilder
      * @return - new Employee created
@@ -88,117 +88,109 @@ public class EmployeeController implements ErrorController {
         }
     }
 
-    @RequestMapping("/create")
-    @ResponseBody
-    public String create(String firstName,
-                         String lastName,
-                         String email,
-                         String teamId,
-                         String role,
-                         @RequestParam(value = "managerId", required = false) Long managerId) {
-        String employeeId = "";
-        Employee employee;
-        try {
-            Employee manager = managerId != null ? employeeDAO.findOne(managerId) : null;
-            employee = new Employee(firstName, lastName, email, teamId, role, manager);
-            employeeDAO.save(employee);
-            employeeId = String.valueOf(employee.getId());
-        } catch (Exception e) {
-            return "Error creating the user: " + e.toString();
+    /**
+     * @param id
+     * @param employee
+     * @return - updated Employee
+     */
+    @RequestMapping(value = "/employee/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<Employee> update(@PathVariable("id") Long id, @RequestBody Employee employee) {
+        System.out.println("Inside Employee Update");
+        Employee currentEmployeeToBeUpdated = employeeDAO.findOne(id);
+
+        if (currentEmployeeToBeUpdated == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return "User successfully created with id = " + employeeId;
-    }
 
-    @RequestMapping("/update/{id}")
-    @ResponseBody
-    public String update(@PathVariable("id") Long id,
-                         @RequestParam(value = "firstName", required = false) String firstName,
-                         @RequestParam(value = "lastName", required = false) String lastName,
-                         @RequestParam(value = "email", required = false) String email,
-                         @RequestParam(value = "teamId", required = false) String teamId,
-                         @RequestParam(value = "role", required = false) String role,
-                         @RequestParam(value = "managerId", required = false) Long managerId) {
         try {
-            Employee employeeToBeUpdated = employeeDAO.findOne(id);
-            if (firstName != null) employeeToBeUpdated.setFirstName(firstName);
-            if (lastName != null) employeeToBeUpdated.setLastName(lastName);
-            if (email != null) employeeToBeUpdated.setEmail(email);
-            if (teamId != null) employeeToBeUpdated.setTeamId(teamId);
-            if (role != null) employeeToBeUpdated.setRole(role);
-            if (managerId != null) employeeToBeUpdated.setManager(employeeDAO.findOne(managerId));
-            employeeDAO.save(employeeToBeUpdated);
+            currentEmployeeToBeUpdated.setFirstName(employee.getFirstName());
+            currentEmployeeToBeUpdated.setLastName(employee.getLastName());
+            currentEmployeeToBeUpdated.setEmail(employee.getEmail());
+            currentEmployeeToBeUpdated.setTeamId(employee.getTeamId());
+            currentEmployeeToBeUpdated.setRole(employee.getRole());
+            currentEmployeeToBeUpdated.setManager(employee.getManager());
+            employeeDAO.save(currentEmployeeToBeUpdated);
         } catch (Exception e) {
-            return "Error updating the user: " + e.toString();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return "User updated successfully";
+        return new ResponseEntity<>(currentEmployeeToBeUpdated, HttpStatus.OK);
     }
 
-    @RequestMapping("/delete/{id}")
-    @ResponseBody
-    public String delete(@PathVariable("id") Long id) {
+    /**
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/employee/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Employee> delete(@PathVariable("id") Long id) {
+        System.out.println("Inside delete employee");
+        Employee retrievedEmployeeToBeDeleted = employeeDAO.findOne(id);
+
+        if (retrievedEmployeeToBeDeleted == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         try {
-            employeeDAO.delete(new Employee(id));
+            //employee.delete(new Employee(id)); // TODO: need to add a method in service for deleting employee
         } catch (Exception e) {
-            return "Error deleting the user: " + e.toString();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return "User " + id + " deleted successfully";
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @RequestMapping("/{id}")
-    @ResponseBody
-    public String findOneById(@PathVariable("id") Long id) {
-        Employee retrievedEmployee;
+    /**
+     * @param id - team id
+     * @return - returns list of employees for that team
+     */
+    @RequestMapping(value = "/employee/team/id", method = RequestMethod.GET)
+    public ResponseEntity<ArrayList<Employee>> findByTeamId(@PathVariable("id") Long id) {
+        ArrayList<Employee> retrievedEmployees;
         try {
-            retrievedEmployee = employeeDAO.findOne(id);
+            retrievedEmployees = employeeDAO.findByTeamId(id);
+
+            if (retrievedEmployees.isEmpty()) {
+                return new ResponseEntity<ArrayList<Employee>>(HttpStatus.NO_CONTENT);
+            }
         } catch (Exception e) {
-            return "Error fetching the employee";
+            return new ResponseEntity<ArrayList<Employee>>(HttpStatus.NO_CONTENT);
         }
-        return "Retrieved Employee with employee first name: " + retrievedEmployee.getFirstName();
+        return new ResponseEntity<ArrayList<Employee>>(retrievedEmployees, HttpStatus.OK);
     }
 
-    @RequestMapping("/{teamId}/team-list")
-    @ResponseBody
-    public String findByTeamId(@PathVariable String teamId) {
-        Set<Employee> retrievedEmployeeList;
+    /**
+     * @param role - role for which employees needs to be fetched
+     * @return - List of employees for that role
+     */
+    @RequestMapping(value = "/employee/role/{role}", method = RequestMethod.GET)
+    public ResponseEntity<ArrayList<Employee>> findByRole(@PathVariable("role") String role) {
+        ArrayList<Employee> retrievedEmployees;
         try {
-            retrievedEmployeeList = employeeDAO.findByTeamId(teamId);
+            retrievedEmployees = employeeDAO.findByRole(role);
+
+            if (retrievedEmployees.isEmpty()) {
+                return new ResponseEntity<ArrayList<Employee>>(HttpStatus.NO_CONTENT);
+            }
         } catch (Exception e) {
-            return "Error fetching the employee";
+            return new ResponseEntity<ArrayList<Employee>>(HttpStatus.NO_CONTENT);
         }
-        return "Total Retrieved Employees for team with id " + teamId + " is " + retrievedEmployeeList.size();
+        return new ResponseEntity<ArrayList<Employee>>(retrievedEmployees, HttpStatus.OK);
     }
 
-    @RequestMapping("/{role}/role-list")
-    @ResponseBody
-    public String findByRole(@PathVariable String role) {
-        Set<Employee> retrievedEmployeeList;
+    /**
+     * @param id - manager employee id
+     * @return - list of employees having
+     */
+    @RequestMapping(value = "/employee/manager/id", method = RequestMethod.GET)
+    public ResponseEntity<ArrayList<Employee>> findByManagerId(@PathVariable("id") Long id) {
+        ArrayList<Employee> retrievedEmployees;
         try {
-            retrievedEmployeeList = employeeDAO.findByRole(role);
+            retrievedEmployees = employeeDAO.findByManagerId(id);
+
+            if (retrievedEmployees.isEmpty()) {
+                return new ResponseEntity<ArrayList<Employee>>(HttpStatus.NO_CONTENT);
+            }
         } catch (Exception e) {
-            return "Error fetching the employee";
+            return new ResponseEntity<ArrayList<Employee>>(HttpStatus.NO_CONTENT);
         }
-        return "Total Retrieved Employees for role " + role + " is " + retrievedEmployeeList.size();
-    }
-
-    @RequestMapping("/{managerId}/employees")
-    @ResponseBody
-    public String findByManagerId(@PathVariable Long managerId) {
-        Set<Employee> retrievedEmployeeList;
-        try {
-            retrievedEmployeeList = employeeDAO.findByManagerId(managerId);
-        } catch (Exception e) {
-            return "Error fetching the employee";
-        }
-        return "Total Retrieved Employees working with manager id " + managerId + " is " + retrievedEmployeeList.size();
-    }
-
-    @RequestMapping(value = PATH)
-    public String error() {
-        return "Error handling";
-    }
-
-    @Override
-    public String getErrorPath() {
-        return PATH;
+        return new ResponseEntity<ArrayList<Employee>>(retrievedEmployees, HttpStatus.OK);
     }
 }
