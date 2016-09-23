@@ -117,6 +117,26 @@ public class LeaveController {
     }
 
     /**
+     *
+     * @param id - employee id
+     * @return - list of leaves for that employee id
+     */
+    @RequestMapping(value = "/leave/employee/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ArrayList<Leave>> getLeaveByEmployeeId(@PathVariable("id") Long id) {
+        System.out.println("Inside find leaves by employee id");
+        ArrayList<Leave> listOfLeaves;
+        try {
+            listOfLeaves = leaveDAO.findByEmployee(employeeDAO.findOne(id));
+            listOfLeaves.forEach(i -> {
+                System.out.println("Leave id: " + i.getId());
+            });
+        } catch (Exception e) {
+            return new ResponseEntity<ArrayList<Leave>>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<ArrayList<Leave>>(listOfLeaves, HttpStatus.OK);
+    }
+
+    /**
      * @param leave
      * @param uriComponentsBuilder
      * @return - new leave created
