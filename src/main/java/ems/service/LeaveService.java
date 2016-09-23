@@ -24,6 +24,19 @@ public class LeaveService {
     @Autowired
     private LeaveDAO leaveDAO;
 
+    public Leave updateLeave (Leave leave) {
+        Leave retrievedLeave = leaveDAO.findOne(leave.getId());
+        if (retrievedLeave != null) {
+            retrievedLeave.setStartDate(leave.getStartDate());
+            retrievedLeave.setEndDate(leave.getEndDate());
+            retrievedLeave.setApproverEmployeeIdList(leave.getApproverEmployeeIdList());
+            retrievedLeave.setApprovalStatus(leave.getApprovalStatus());
+            retrievedLeave.setAutoDeducted(leave.getAutoDeducted());
+            retrievedLeave.setNoOfDays(leave.getNoOfDays());
+        }
+        return leave;
+    }
+
     public ArrayList<Leave> findByStartDateBetweenForEmployeeId(LocalDate startDate, LocalDate endDate, Long employeeId) {
         return leaveDAO.findByStartDateBetween(startDate, endDate).parallelStream().filter(leave -> leave.getEmployee().getId() == employeeId).collect(Collectors.toCollection(ArrayList::new));
     }

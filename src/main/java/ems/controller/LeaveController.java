@@ -145,24 +145,13 @@ public class LeaveController {
     @RequestMapping(value = "/leave/{id}", method = RequestMethod.PUT)
     public ResponseEntity<Leave> update(@PathVariable Long id, @RequestBody Leave leave) {
         System.out.println("Inside update leave");
-        Leave currentLeaveToBeUpdated = leaveDAO.findOne(id);
-
-        if (currentLeaveToBeUpdated == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
         try {
-            currentLeaveToBeUpdated.setStartDate(leave.getStartDate());
-            currentLeaveToBeUpdated.setEndDate(leave.getEndDate());
-            currentLeaveToBeUpdated.setApproverEmployeeIdList(leave.getApproverEmployeeIdList());
-            currentLeaveToBeUpdated.setApprovalStatus(leave.getApprovalStatus());
-            currentLeaveToBeUpdated.setAutoDeducted(leave.getAutoDeducted());
-            leaveDAO.save(currentLeaveToBeUpdated); // TODO: need to add a method in service for updation
+            leave = leaveService.updateLeave(leave);
 
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(currentLeaveToBeUpdated, HttpStatus.OK);
+        return new ResponseEntity<>(leave, HttpStatus.OK);
     }
 
     /**

@@ -1,12 +1,16 @@
 package ems.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.joda.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.joda.time.LocalDate;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.util.Set;
 
 @Data
@@ -20,6 +24,8 @@ public class Leave {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     @NotNull
     private LocalDate startDate;
 
@@ -38,7 +44,7 @@ public class Leave {
     private String autoDeducted;
     private String teamId;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(name = "leave_employee_map",
             joinColumns = @JoinColumn(name = "leave_id"),
             inverseJoinColumns = @JoinColumn(name = "approver_employee_id")
