@@ -8,62 +8,30 @@
     function ChartController(HighChartService) {
         var chartVm = this;
         console.log('Inside Home Controller');
+        console.log('inside get all leave function');
 
-        function getAllLeave() {
-            console.log('inside get all leave function');
-            HighChartService.fetchAllLeaves()
-                .then(
-                    function (result) {
-                        console.log('result: ', result);
-                    },
-                    function (error) {
-                        console.log('error: ', error);
-                    }
-                );
-
-            HighChartService.fetchAllEmployees()
-                .then(
-                    function (result) {
-                        console.log('result: ', result);
-                    },
-                    function (error) {
-                        console.log('error: ', error);
-                    }
-                );
-
-            HighChartService.fetchLeaveById(2)
-                .then(
-                    function (result) {
-                        console.log('result by id: ', result);
-                    },
-                    function (error) {
-                        console.log('error: ', error);
-                    }
-                );
-
-            HighChartService.fetchLeavesByEmployeeId(2)
-                .then(
-                    function (result) {
-                        console.log('result by id: ', result);
-                    },
-                    function (error) {
-                        console.log('error: ', error);
-                    }
-                );
-        }
-
-        getAllLeave();
-
-        Highcharts.chart('highchartContainer', {
-
-            xAxis: {
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            },
-
-            series: [{
-                data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
-            }]
-        });
+        HighChartService
+            .fetchAllEmployees()
+            .then(function (result) {
+                    chartVm.employees = _.map(result, 'firstName');
+                    chartVm.ids = _.map(result, 'id');
+                    _.forEach(chartVm.ids, function(id) {
+                       HighChartService.fetchLeavesByEmployeeId(id)
+                           .then(function (result) {
+                               console.log('id: ', id);
+                               console.log('Leave Result for id: ', result);
+                           })
+                    });
+                    console.log('Employees', chartVm.employees);
+                    Highcharts.chart('highchartContainer', {
+                        xAxis: {
+                            categories: chartVm.employees
+                        },
+                        series: [{
+                            data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0]
+                        }]
+                    });
+                }
+            )
     }
 }());

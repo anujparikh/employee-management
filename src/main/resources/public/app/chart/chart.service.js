@@ -18,7 +18,6 @@
             $http.get('/leave/' + id)
                 .then(
                     function (response) {
-                        console.log(response);
                         defer.resolve(response.data);
                     },
                     function (error) {
@@ -33,7 +32,6 @@
             $http.get('/leave/employee/' + id)
                 .then(
                     function (response) {
-                        console.log('Employee: ', response);
                         defer.resolve(response.data);
                     },
                     function (error) {
@@ -48,7 +46,6 @@
             $http.get('/leave/')
                 .then(
                     function (response) {
-                        console.log(response);
                         defer.resolve(response.data);
                     },
                     function (error) {
@@ -63,7 +60,6 @@
             $http.get('/employee/')
                 .then(
                     function (response) {
-                        console.log(response);
                         defer.resolve(response.data);
                     },
                     function (error) {
