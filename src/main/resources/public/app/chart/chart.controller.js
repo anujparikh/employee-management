@@ -21,6 +21,16 @@
                     }
                 );
 
+            HighChartService.fetchAllEmployees()
+                .then(
+                    function (result) {
+                        console.log('result: ', result);
+                    },
+                    function (error) {
+                        console.log('error: ', error);
+                    }
+                );
+
             HighChartService.fetchLeaveById(2)
                 .then(
                     function (result) {

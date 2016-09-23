@@ -9,7 +9,8 @@
         return {
             fetchAllLeaves: fetchAllLeaves,
             fetchLeaveById: fetchLeaveById,
-            fetchLeavesByEmployeeId: fetchLeavesByEmployeeId
+            fetchLeavesByEmployeeId: fetchLeavesByEmployeeId,
+            fetchAllEmployees: fetchAllEmployees
         };
 
         function fetchLeaveById(id) {
@@ -45,6 +46,21 @@
         function fetchAllLeaves() {
             var defer = $q.defer();
             $http.get('/leave/')
+                .then(
+                    function (response) {
+                        console.log(response);
+                        defer.resolve(response.data);
+                    },
+                    function (error) {
+                        defer.reject(error.status);
+                    }
+                );
+            return defer.promise;
+        }
+
+        function fetchAllEmployees() {
+            var defer = $q.defer();
+            $http.get('/employee/')
                 .then(
                     function (response) {
                         console.log(response);
