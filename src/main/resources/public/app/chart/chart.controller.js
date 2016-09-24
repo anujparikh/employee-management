@@ -7,31 +7,46 @@
 
     function ChartController(HighChartService) {
         var chartVm = this;
-        console.log('Inside Home Controller');
-        console.log('inside get all leave function');
+        chartVm.input = [];
+        chartVm.names = [];
+        chartVm.totalLeaves = [];
 
         HighChartService
             .fetchAllEmployees()
             .then(function (result) {
-                    chartVm.employees = _.map(result, 'firstName');
-                    chartVm.ids = _.map(result, 'id');
-                    _.forEach(chartVm.ids, function(id) {
-                       HighChartService.fetchLeavesByEmployeeId(id)
-                           .then(function (result) {
-                               console.log('id: ', id);
-                               console.log('Leave Result for id: ', result);
-                           })
-                    });
-                    console.log('Employees', chartVm.employees);
-                    Highcharts.chart('highchartContainer', {
-                        xAxis: {
-                            categories: chartVm.employees
-                        },
-                        series: [{
-                            data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0]
-                        }]
-                    });
-                }
-            )
+                _.forEach(result, function (value) {
+                    HighChartService
+                        .fetchLeavesByEmployeeId(value.id)
+                        .then(function (result) {
+                            _.forEach(result, function (value) {
+                                createInput(value.employee.firstName, value.noOfDays);
+                            });
+                            Highcharts.chart('highchartContainer', {
+                                xAxis: {
+                                    categories: chartVm.names
+                                },
+                                series: [{
+                                    data: chartVm.totalLeaves
+                                }]
+                            });
+                        }, function (error) {
+
+                        });
+                });
+            }, function (error) {
+
+            });
+
+        function createInput(firstName, noOfDays) {
+            var key = _.findKey(chartVm.input, {'name': firstName});
+            if (key) {
+                chartVm.input[key].totalLeaves += noOfDays;
+                chartVm.totalLeaves[key] += noOfDays;
+            } else {
+                chartVm.input.push({name: firstName, totalLeaves: noOfDays});
+                chartVm.names.push(firstName);
+                chartVm.totalLeaves.push(noOfDays);
+            }
+        }
     }
 }());
