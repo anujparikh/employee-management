@@ -7,6 +7,7 @@ Java
 Spring Boot
 AngularJS
 MySQL
+Docker
 
 **This repo is still under development**. Need to integrate My-SQL to this image
 
