@@ -14,5 +14,5 @@ Docker
 Getting Started Instructions:
 
 1) Clone the repo `https://github.com/anujparikh/employee-management-BE.git`  
-2) Run the Application.java as Spring Boot Application  
+2) Run the `Application.java` as Spring Boot Application  
 3) Project url: `http://localhost:<default-port>`  
